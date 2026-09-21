@@ -55,7 +55,9 @@ p{margin:0 0 1em}
 
 /* ---- hero ---- */
 .hero{position:relative;min-height:92svh;display:flex;align-items:flex-end;
-  background:#0C0C0E url('../img/apex_hero.jpg') center 38%/cover no-repeat}
+  background:#0C0C0E;overflow:hidden}
+.hero-bg{position:absolute;inset:-6% 0;background:url('../img/apex_hero.jpg') center 38%/cover no-repeat;
+  will-change:transform;transform:scale(1.04)}
 .hero::after{content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(12,12,14,.55) 0%,rgba(12,12,14,.12) 34%,rgba(12,12,14,.28) 62%,rgba(12,12,14,.94) 100%)}
 .hero-in{position:relative;z-index:1;width:100%;padding-block:150px 0}
@@ -185,10 +187,31 @@ footer{padding:60px 0 80px}
   font:500 12.5px/1.7 var(--fd);color:var(--faint);max-width:86ch}
 .legal a{color:var(--muted)}
 
+/* the lap: a racing line drawn by scroll (desktop, motion-ok only) */
+.lap{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:none}
+.lap path{fill:none;stroke:var(--accent);stroke-width:2;opacity:.16}
+.lap circle{fill:var(--accent);opacity:.6}
+main{position:relative}
+main>section,main>.pen,main>footer{position:relative;z-index:1}
+.crow figure{transform:translateZ(0)}
+.crow img{will-change:transform;transform:scale(1.07)}
+
 /* reveal */
 @media(prefers-reduced-motion:no-preference){
   .js .rv{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s cubic-bezier(.2,.7,.3,1)}
   .js .rv.in{opacity:1;transform:none}
+  .js .stats>div,.js .biz article,.js .press a,.js .pen li{opacity:0;transform:translateY(12px);
+    transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+  .js .rv.in .stats>div,.js .rv.in .biz article,.js .rv.in .press a,.js .rv.in .pen li,
+  .js .in .stats>div,.js .in .biz article,.js .in .press a,.js .in .pen li{opacity:1;transform:none}
+  .js .in .stats>div:nth-child(2),.js .in .biz article:nth-child(2),.js .in .press a:nth-child(2){transition-delay:.08s}
+  .js .in .stats>div:nth-child(3),.js .in .biz article:nth-child(3),.js .in .press a:nth-child(3){transition-delay:.16s}
+  .js .in .stats>div:nth-child(4),.js .in .biz article:nth-child(4),.js .in .press a:nth-child(4){transition-delay:.24s}
+  .js .in .press a:nth-child(5){transition-delay:.32s}
+  .js .in .press a:nth-child(6){transition-delay:.4s}
+  .js .in .pen li:nth-child(2){transition-delay:.08s}
+  .js .in .pen li:nth-child(3){transition-delay:.16s}
+  @media(min-width:900px){.lap{display:block}}
 }
 </style>
 </head>
@@ -212,7 +235,9 @@ footer{padding:60px 0 80px}
 </header>
 
 <main id="top">
+<svg class="lap" aria-hidden="true" preserveAspectRatio="none"><path d=""/><circle r="4" cx="-10" cy="-10"/></svg>
 <section class="hero" style="padding:0">
+  <div class="hero-bg" aria-hidden="true"></div>
   <div class="wrap hero-in">
     <h1>Five tracks. One place.</h1>
     <p class="lede">Longhorn International Motorsports is building the future ecosystem of
@@ -223,7 +248,7 @@ footer{padding:60px 0 80px}
       <a class="btn ghost" href="https://longhornmsc.com/thebullpen/">Join The Bull Pen, free</a>
     </div>
     <p class="hero-note">Campus rendering: the development as envisioned. Plans subject to final design and approvals.</p>
-    <div class="stats">
+    <div class="stats rv">
       <div><b>3.9 mi</b><span>FIA Grade I circuit, Tilke designed</span></div>
       <div><b>1/4 mi</b><span>Dragway to NHRA + IHRA standards</span></div>
       <div><b>5</b><span>Racing disciplines on one campus</span></div>
@@ -519,6 +544,68 @@ footer{padding:60px 0 80px}
     es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
   }, { rootMargin:'0px 0px -10% 0px', threshold:.07 });
   rvs.forEach(function(el){ io.observe(el); });
+  setTimeout(function(){ rvs.forEach(function(el){
+    if(el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in'); }); }, 650);
+
+  // ---- one clean scroll: hero depth, figure parallax, the lap line ----
+  var heroBg = document.querySelector('.hero-bg');
+  var figs = Array.prototype.slice.call(document.querySelectorAll('.crow img'));
+  var lap = document.querySelector('.lap');
+  var lapPath = lap && lap.querySelector('path');
+  var lapDot = lap && lap.querySelector('circle');
+  var lapLen = 0, wide = window.matchMedia('(min-width:900px)');
+
+  function buildLap(){
+    if(!lap || !wide.matches) return;
+    var main = document.querySelector('main');
+    var H = main.scrollHeight, W = main.clientWidth;
+    lap.setAttribute('viewBox','0 0 '+W+' '+H);
+    lap.style.height = H+'px';
+    var secs = Array.prototype.slice.call(document.querySelectorAll('main>section, main>.pen'));
+    var xs=[.5,.82,.16,.84,.18,.8,.5];
+    var d='M '+(W*.5)+' '+Math.round(window.innerHeight*.92);
+    var py=Math.round(window.innerHeight*.92), px=W*.5;
+    secs.slice(1).forEach(function(sec,i){
+      var y = sec.offsetTop + sec.offsetHeight*.5;
+      var x = W*xs[(i+1)%xs.length];
+      d += ' C '+px+' '+Math.round(py+(y-py)*.5)+', '+x+' '+Math.round(py+(y-py)*.5)+', '+x+' '+Math.round(y);
+      px=x; py=y;
+    });
+    d += ' C '+px+' '+(py+220)+', '+(W*.5)+' '+(H-260)+', '+(W*.5)+' '+(H-80);
+    lapPath.setAttribute('d', d);
+    lapLen = lapPath.getTotalLength();
+    lapPath.style.strokeDasharray = lapLen;
+    lapPath.style.strokeDashoffset = lapLen;
+  }
+
+  var ticking=false;
+  function paint(){
+    ticking=false;
+    var sc = window.scrollY || document.documentElement.scrollTop;
+    var vh = window.innerHeight;
+    if(heroBg){
+      var p = Math.min(1, sc/vh);
+      heroBg.style.transform = 'translate3d(0,'+(p*vh*.12)+'px,0) scale(1.04)';
+    }
+    figs.forEach(function(img){
+      var r = img.getBoundingClientRect();
+      if(r.bottom<0||r.top>vh) return;
+      var c = (r.top + r.height/2 - vh/2)/vh; // -0.5..0.5
+      img.style.transform = 'translate3d(0,'+(c*-14)+'px,0) scale(1.07)';
+    });
+    if(lapLen && wide.matches){
+      var doc = document.documentElement;
+      var prog = Math.min(1, Math.max(0, sc/(doc.scrollHeight - vh)));
+      lapPath.style.strokeDashoffset = lapLen*(1-prog);
+      var pt = lapPath.getPointAtLength(lapLen*prog);
+      lapDot.setAttribute('cx', pt.x); lapDot.setAttribute('cy', pt.y);
+    }
+  }
+  function onScroll(){ if(!ticking){ ticking=true; requestAnimationFrame(paint); } }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', function(){ buildLap(); onScroll(); });
+  if(document.readyState==='complete'){ buildLap(); paint(); }
+  else window.addEventListener('load', function(){ buildLap(); paint(); });
 })();
 </script>
 </body>

@@ -53,7 +53,9 @@ p{margin:0 0 1em}
 
 /* hero */
 .hero{position:relative;min-height:88svh;display:flex;align-items:flex-end;
-  background:#08090B url('../img/night_straight.jpg') center 30%/cover no-repeat}
+  background:#08090B;overflow:hidden}
+.hero-bg{position:absolute;inset:-6% 0;background:url('../img/night_straight.jpg') center 30%/cover no-repeat;
+  will-change:transform;transform:scale(1.05)}
 .hero::after{content:"";position:absolute;inset:0;
   background:linear-gradient(180deg,rgba(8,9,11,.62) 0%,rgba(8,9,11,.1) 40%,rgba(8,9,11,.55) 74%,rgba(8,9,11,.97) 100%)}
 .hero-in{position:relative;z-index:1;width:100%;padding-block:140px 54px}
@@ -178,6 +180,12 @@ footer{padding:64px 0 84px}
 @media(prefers-reduced-motion:no-preference){
   .js .rv{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
   .js .rv.in{opacity:1;transform:none}
+  .js .grid .cell,.js .hud span{opacity:0;transform:translateY(12px);
+    transition:opacity .5s ease,transform .5s cubic-bezier(.2,.7,.3,1)}
+  .js .in .cell,.js .hud.in span{opacity:1;transform:none}
+  .js .in .cell:nth-child(2),.js .hud.in span:nth-child(2){transition-delay:.08s}
+  .js .in .cell:nth-child(3),.js .hud.in span:nth-child(3){transition-delay:.16s}
+  .js .in .cell:nth-child(4),.js .hud.in span:nth-child(4){transition-delay:.24s}
 }
 </style>
 </head>
@@ -202,6 +210,7 @@ footer{padding:64px 0 84px}
 
 <main id="top">
 <section class="hero" style="padding:0">
+  <div class="hero-bg" aria-hidden="true"></div>
   <div class="wrap hero-in">
     <h1>Leave it on the <em>track.</em></h1>
     <p class="sub">Five racing disciplines, one North Texas campus. Road, drag, off-road,
@@ -210,7 +219,7 @@ footer{padding:64px 0 84px}
       <a class="btn solid" href="#select">Choose your track</a>
       <a class="btn ghost" href="https://longhornmsc.com/thebullpen/">Join The Bull Pen</a>
     </div>
-    <div class="hud">
+    <div class="hud rv">
       <span>Location <b>North Texas</b></span>
       <span>Status <b>In development</b></span>
       <span>Road circuit <b>3.9 mi FIA Grade I</b></span>
@@ -242,7 +251,7 @@ footer{padding:64px 0 84px}
           </div>
           <div class="diff">
             <div class="lab"><span>Difficulty</span><output data-f="dnum">93%</output></div>
-            <div class="bar"><i data-f="dbar" style="width:93%"></i></div>
+            <div class="bar"><i data-f="dbar" style="width:0"></i></div>
           </div>
         </div>
         <div class="simg">
@@ -413,12 +422,26 @@ footer{padding:64px 0 84px}
   var rvs = Array.prototype.slice.call(document.querySelectorAll('.rv'));
   if(!('IntersectionObserver' in window) ||
      (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
-    rvs.forEach(function(el){ el.classList.add('in'); }); return;
+    rvs.forEach(function(el){ el.classList.add('in'); });
+    F('dbar').style.width = DATA[cur].d + '%';
+    return;
   }
   var io = new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);
+      if(e.target.hasAttribute('data-select')) requestAnimationFrame(function(){ F('dbar').style.width = DATA[cur].d + '%'; });
+    } });
   }, {rootMargin:'0px 0px -10% 0px', threshold:.07});
   rvs.forEach(function(el){ io.observe(el); });
+  setTimeout(function(){ rvs.forEach(function(el){
+    if(el.getBoundingClientRect().top < window.innerHeight) el.classList.add('in'); }); }, 650);
+
+  // hero depth on scroll
+  var heroBg = document.querySelector('.hero-bg'), tick=false;
+  function paint(){ tick=false;
+    var sc = window.scrollY||document.documentElement.scrollTop, vh=window.innerHeight;
+    if(heroBg){ var p=Math.min(1,sc/vh);
+      heroBg.style.transform='translate3d(0,'+(p*vh*.12)+'px,0) scale(1.05)'; } }
+  window.addEventListener('scroll', function(){ if(!tick){tick=true;requestAnimationFrame(paint);} }, {passive:true});
 })();
 </script>
 </body>
