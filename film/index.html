@@ -17,7 +17,7 @@
   --bg:#0C0C0E; --panel:#16161B; --line:#26262D; --line-2:#3A3A44;
   --ink:#F2F0EC; --muted:#B4B1AA; --faint:#8A8781;
   --accent:#E23A1E; --accent-press:#C22F16;
-  --seam:#676e75; /* sampled from the film's final frame */
+  --seam:#8e8a82; /* sampled from the film's final frame (1080p master) */
   --fd:'Archivo','Segoe UI',system-ui,sans-serif;
   --fb:'Source Serif 4',Georgia,serif;
   --wrap:1160px;
@@ -372,7 +372,7 @@ footer{padding:64px 0 84px}
           if (i===0 && !firstShown){ firstShown=true; drawFrame(0,true); }
           lfill.style.width = Math.round(100*Math.min(1,loaded/Math.min(FRAME_COUNT,PRIORITY)))+'%';
           if (loaded >= Math.min(FRAME_COUNT, PRIORITY)) reveal();
-          if (loaded === FRAME_COUNT) allLoaded = true;
+          if (loaded === FRAME_COUNT){ allLoaded = true; window.__allLoaded = true; }
           pump(); };
         im.onerror = function(){ inflight--; pump(); };
         im.src = FDIR + 'f_' + pad(i) + '.jpg';
