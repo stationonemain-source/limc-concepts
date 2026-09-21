@@ -57,7 +57,7 @@ p{margin:0 0 1em}
 @media(max-width:640px){#chrome .brand small{display:none}}
 
 /* ---------- film ---------- */
-#filmScroll{position:relative;height:850vh}
+#filmScroll{position:relative;height:560vh}
 #stage{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--bg)}
 #film{position:absolute;inset:0;width:100%;height:100%}
 #vignette{position:absolute;inset:0;pointer-events:none;
@@ -320,29 +320,32 @@ footer{padding:64px 0 84px}
   // frame store
   var images = new Array(1024), loaded = 0, firstShown = false;
   var bitmaps = new Map(), decoding = new Set();
-  var B_AHEAD = 18, B_KEEP = 28, bmpCenter = -999;
+  var B_AHEAD = 24, B_KEEP = 34, bmpCenter = -999;
   var displayed = -1, currentFrame = 0, targetFrame = 0;
 
   function pad(n){ n=''+(n+1); while(n.length<PAD) n='0'+n; return n; }
+  function launchDecode(i){
+    decoding.add(i);
+    createImageBitmap(images[i]).then(function(b){
+      decoding.delete(i);
+      if (Math.abs(i - bmpCenter) > B_KEEP){ b.close(); return; }
+      bitmaps.set(i, b);
+      if (i === displayed) drawFrame(i, true);
+    }).catch(function(){ decoding.delete(i); });
+  }
   function ensureBitmaps(center){
-    if (Math.abs(center - bmpCenter) < 3 && bitmaps.size) return;
     bmpCenter = center;
-    var lo = Math.max(0, center-B_AHEAD), hi = Math.min(FRAME_COUNT-1, center+B_AHEAD);
-    for (var i=lo;i<=hi;i++){
-      (function(i){
-        if (bitmaps.has(i) || decoding.has(i) || !images[i]) return;
-        decoding.add(i);
-        createImageBitmap(images[i]).then(function(b){
-          decoding.delete(i);
-          if (Math.abs(i - bmpCenter) > B_KEEP){ b.close(); return; }
-          bitmaps.set(i, b);
-          if (i === displayed) drawFrame(i, true);
-        }).catch(function(){ decoding.delete(i); });
-      })(i);
+    var budget = 6;                       // decode launches per tick, nearest first
+    for (var d=0; d<=B_AHEAD && budget>0; d++){
+      var a1 = center+d, a2 = center-d;
+      if (a1 < FRAME_COUNT && images[a1] && !bitmaps.has(a1) && !decoding.has(a1)){ launchDecode(a1); budget--; }
+      if (d>0 && budget>0 && a2 >= 0 && images[a2] && !bitmaps.has(a2) && !decoding.has(a2)){ launchDecode(a2); budget--; }
     }
-    bitmaps.forEach(function(b,k){
-      if (k < center-B_KEEP || k > center+B_KEEP){ b.close(); bitmaps.delete(k); }
-    });
+    if (bitmaps.size > 2*B_KEEP){
+      bitmaps.forEach(function(b,k){
+        if (k < center-B_KEEP || k > center+B_KEEP){ b.close(); bitmaps.delete(k); }
+      });
+    }
   }
   function nearestFrame(idx){
     if (images[idx]) return idx;
