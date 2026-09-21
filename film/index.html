@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Flying Lap</title>
+<meta name="description" content="A scroll-film concept for Longhorn International Motorsports: one continuous dive from the Texas sky onto the circuit, prepared by Station.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0C0C0E">
+<script>document.documentElement.classList.add("js")</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="../img/limc-logo.png">
+<style>
+:root{
+  --bg:#0C0C0E; --panel:#16161B; --line:#26262D; --line-2:#3A3A44;
+  --ink:#F2F0EC; --muted:#B4B1AA; --faint:#8A8781;
+  --accent:#E23A1E; --accent-press:#C22F16;
+  --seam:#676e75; /* sampled from the film's final frame */
+  --fd:'Archivo','Segoe UI',system-ui,sans-serif;
+  --fb:'Source Serif 4',Georgia,serif;
+  --wrap:1160px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:auto}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.65 var(--fb);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{max-width:100%;display:block;height:auto}
+a{color:var(--ink)}
+h1,h2,h3{margin:0;font-family:var(--fd);text-wrap:balance}
+p{margin:0 0 1em}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 20px}
+::selection{background:var(--accent);color:#fff}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
+
+/* ---------- loader ---------- */
+#loader{position:fixed;inset:0;z-index:90;background:var(--bg);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:22px;transition:opacity .6s ease}
+#loader.gone{opacity:0;pointer-events:none}
+#loader img{width:84px;height:84px}
+#loader .lbar{width:min(320px,60vw);height:2px;background:var(--line);border-radius:99px;overflow:hidden}
+#loader .lbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s ease}
+#loader small{font:600 11.5px/1 var(--fd);letter-spacing:.18em;color:var(--faint)}
+
+/* ---------- fixed chrome ---------- */
+#chrome{position:fixed;inset:0 0 auto;z-index:40;padding:0 22px;height:62px;
+  display:flex;align-items:center;gap:14px;color:#F2F0EC;transition:color .35s ease}
+#chrome.on-light{color:#131316}
+#chrome .brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:currentColor;min-height:44px}
+#chrome .brand img{width:36px;height:36px}
+#chrome .brand b{font:700 12.5px/1.2 var(--fd);letter-spacing:.12em}
+#chrome .brand small{display:block;font:500 9.5px/1.3 var(--fd);letter-spacing:.2em;opacity:.75}
+#chrome .sector{margin-left:auto;text-align:right;font:600 11px/1.5 var(--fd);letter-spacing:.14em;opacity:.9}
+#chrome .sector .sbar{margin-top:6px;width:120px;height:2px;background:currentColor;opacity:.28;border-radius:99px;position:relative}
+#chrome .sector .sbar i{position:absolute;inset:0 auto 0 0;width:0;background:var(--accent);opacity:1;border-radius:99px}
+@media(max-width:640px){#chrome .brand small{display:none}}
+
+/* ---------- film ---------- */
+#filmScroll{position:relative;height:850vh}
+#stage{position:sticky;top:0;height:100vh;overflow:hidden;background:var(--bg)}
+#film{position:absolute;inset:0;width:100%;height:100%}
+#vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,0,.42) 100%);
+  transition:opacity .3s}
+#grain{position:absolute;inset:0;pointer-events:none;opacity:.07;mix-blend-mode:overlay}
+#fadeout{position:absolute;inset:auto 0 0 0;height:46vh;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,transparent, var(--seam))}
+
+.beat{position:absolute;inset:0;display:flex;align-items:center;pointer-events:none;opacity:0}
+.beat .in{width:100%;max-width:var(--wrap);margin:0 auto;padding:0 24px}
+.beat h2{font:800 clamp(2rem,5.6vw,4rem)/1.02 var(--fd);letter-spacing:-.02em;
+  text-transform:uppercase;max-width:16ch;text-shadow:0 2px 26px rgba(0,0,0,.55)}
+.beat p{margin:16px 0 0;font:400 clamp(1rem,2vw,1.2rem)/1.55 var(--fb);color:#E8E5DF;
+  max-width:44ch;text-shadow:0 1px 16px rgba(0,0,0,.6)}
+.beat.hero{align-items:flex-end}
+.beat.hero .in{padding-bottom:15vh}
+.beat.hero .over{font:700 12px/1 var(--fd);letter-spacing:.22em;color:#F2F0EC;opacity:.85;
+  display:block;margin-bottom:18px;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+.beat.hero h2{font-size:clamp(2.5rem,7.2vw,5.4rem);max-width:14ch}
+.beat.finale{pointer-events:none}
+.beat.finale .in{pointer-events:none}
+.beat.finale.live .in{pointer-events:auto}
+.cta-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;
+  border-radius:4px;text-decoration:none;font:700 15px/1 var(--fd);
+  transition:background .18s,border-color .18s}
+.btn.solid{background:var(--accent);color:#fff}
+.btn.solid:hover{background:var(--accent-press)}
+.btn.ghost{background:rgba(12,12,14,.35);color:var(--ink);border:1px solid rgba(255,255,255,.4);
+  backdrop-filter:blur(6px)}
+.btn.ghost:hover{border-color:#fff}
+
+#cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);pointer-events:none;
+  color:#F2F0EC;opacity:.8}
+#cue svg{width:22px;height:22px;animation:cue 1.8s ease-in-out infinite}
+@keyframes cue{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
+@media(prefers-reduced-motion:reduce){#cue svg{animation:none}}
+
+/* ---------- after-film content ---------- */
+#after{position:relative;background:linear-gradient(180deg,var(--seam) 0,var(--bg) 46vh)}
+#after .lead{padding:15vh 0 0}
+#after h2{font:800 clamp(1.7rem,4vw,2.6rem)/1.05 var(--fd);letter-spacing:-.02em;text-transform:uppercase}
+#after .lead p{margin:18px 0 0;color:var(--muted);max-width:62ch;font-size:18px}
+
+.strip{margin:54px 0 0;border-top:1px solid var(--line)}
+.strip .row{display:grid;grid-template-columns:1fr auto auto;gap:8px 26px;align-items:baseline;
+  padding:17px 4px;border-bottom:1px solid var(--line)}
+.strip b{font:700 17px/1.4 var(--fd)}
+.strip .spec{font:600 12.5px/1.6 var(--fd);letter-spacing:.05em;text-transform:uppercase;color:var(--faint)}
+.strip .d{font:600 12.5px/1.6 var(--fd);color:var(--muted);font-variant-numeric:tabular-nums}
+@media(max-width:640px){.strip .row{grid-template-columns:1fr auto}.strip .spec{display:none}}
+
+.trio{margin:64px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.trio figure{margin:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.trio img{width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}
+.trio figcaption{padding:13px 15px 15px;font:600 13.5px/1.5 var(--fd);color:var(--muted)}
+.trio figcaption b{display:block;color:var(--ink);font-weight:700}
+@media(max-width:760px){.trio{grid-template-columns:1fr}}
+
+.close{margin:84px 0 0;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;
+  padding:38px 32px;display:grid;grid-template-columns:1.35fr 1fr;gap:30px;align-items:center}
+.close p{margin:12px 0 0;color:var(--muted);font-size:15.5px}
+.close .act{display:flex;flex-direction:column;gap:10px}
+.close .act a.plain{font:600 14px/1.4 var(--fd);color:var(--muted);text-decoration:none;text-align:center;
+  min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.close .act a.plain:hover{color:var(--ink)}
+@media(max-width:820px){.close{grid-template-columns:1fr}}
+
+footer{padding:64px 0 84px}
+.foot{display:flex;flex-wrap:wrap;gap:16px 44px}
+.foot b{display:block;font:700 12px/1 var(--fd);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--faint);margin-bottom:12px}
+.foot a,.foot span{display:block;font:600 15px/1.6 var(--fd);color:var(--muted);
+  text-decoration:none;padding:7px 0}
+.foot a:hover{color:var(--ink)}
+.legal{margin-top:40px;padding-top:22px;border-top:1px solid var(--line);
+  font:500 12.5px/1.8 var(--fd);color:var(--faint);max-width:88ch}
+.legal a{color:var(--muted)}
+
+/* reduced motion / no-js: static poster + content */
+.static-hero{display:none}
+@media(prefers-reduced-motion:reduce){
+  #filmScroll{height:auto}
+  #stage{position:relative;height:100svh}
+  .beat,.beat.finale{display:none}
+  .static-hero{display:flex;position:absolute;inset:0;align-items:flex-end}
+  #cue{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="loader" role="status" aria-label="Loading the film">
+  <img src="../img/limc-logo.png" alt="">
+  <div class="lbar"><i id="lfill"></i></div>
+  <small>THE FLYING LAP</small>
+</div>
+
+<header id="chrome">
+  <a class="brand" href="../" aria-label="Back to LIMC concepts">
+    <img src="../img/limc-logo.png" alt="">
+    <span><b>LONGHORN</b><small>INTERNATIONAL MOTORSPORTS</small></span>
+  </a>
+  <div class="sector" aria-hidden="true">
+    <span id="secLabel">S1 &middot; THE DIVE</span>
+    <div class="sbar"><i id="secFill"></i></div>
+  </div>
+</header>
+
+<div id="filmScroll">
+  <div id="stage">
+    <canvas id="film" aria-label="A continuous flight from the Texas sky down onto the LIMC circuit as you scroll"></canvas>
+    <canvas id="grain" aria-hidden="true"></canvas>
+    <div id="vignette" aria-hidden="true"></div>
+    <div id="fadeout" aria-hidden="true"></div>
+
+    <div class="beat hero" data-in="-0.1" data-peak="0" data-out="0.085">
+      <div class="in">
+        <span class="over">LONGHORN INTERNATIONAL MOTORSPORTS</span>
+        <h2>The future of motorsports is a place.</h2>
+      </div>
+    </div>
+    <div class="beat" data-in="0.15" data-peak="0.215" data-out="0.29">
+      <div class="in"><h2>Five tracks. One place.</h2>
+        <p>A 3.9-mile FIA Grade I road circuit, Tilke designed, laid into
+           the North Texas prairie.</p></div>
+    </div>
+    <div class="beat" data-in="0.36" data-peak="0.43" data-out="0.5">
+      <div class="in"><h2>Built to sanctioning standards.</h2>
+        <p>A quarter-mile dragway to NHRA and IHRA standards, karting,
+           off-road and a two-mile drift circuit beside it.</p></div>
+    </div>
+    <div class="beat" data-in="0.56" data-peak="0.63" data-out="0.7">
+      <div class="in"><h2>More than a racetrack.</h2>
+        <p>Car condos over the circuit, retail, hotels, a chophouse and a
+           race academy: racing, research and trackside living together.</p></div>
+    </div>
+    <div class="beat finale" data-in="0.9" data-peak="0.975" data-out="2">
+      <div class="in">
+        <h2>When the lights come on.</h2>
+        <p>Be there before everyone standing in the field.</p>
+        <div class="cta-row">
+          <a class="btn solid" href="https://longhornmsc.com/thebullpen/">Join The Bull Pen, free</a>
+          <a class="btn ghost" href="mailto:ir@longhornmsc.com?subject=Investor%20presentation%20request">Investor presentation</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="static-hero">
+      <div class="in wrap" style="padding-bottom:12vh">
+        <h2 style="font:800 clamp(2.2rem,6vw,4.4rem)/1.02 var(--fd);text-transform:uppercase">The future of motorsports is a place.</h2>
+      </div>
+    </div>
+
+    <div id="cue" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+    </div>
+  </div>
+</div>
+
+<main id="after">
+  <div class="wrap lead">
+    <h2>The lap you just flew</h2>
+    <p>Everything under the camera is planned for one campus in North Texas.
+      Five venues, each built for its discipline, wrapped in an ecosystem of
+      research, retail, hospitality and trackside living.</p>
+
+    <div class="strip">
+      <div class="row"><b>Longhorn International Speedway</b><span class="spec">Road</span><span class="d">3.9 mi &middot; FIA Grade I &middot; Tilke designed</span></div>
+      <div class="row"><b>Area22 Dragway</b><span class="spec">Drag</span><span class="d">1/4 mi &middot; NHRA + IHRA standards</span></div>
+      <div class="row"><b>Blackland Off-Road</b><span class="spec">Off-road</span><span class="d">MX park &middot; proving grounds</span></div>
+      <div class="row"><b>Longhorn Karting Complex</b><span class="spec">Karting</span><span class="d">1/4 mi &middot; Battle Racing</span></div>
+      <div class="row"><b>Longhorn Drift Park</b><span class="spec">Drift</span><span class="d">2 mi &middot; night sessions</span></div>
+    </div>
+
+    <div class="trio">
+      <figure><img src="../img/their_motorville.jpg" alt="LIMC's own render of the MotorVille car condos" loading="lazy" style="object-position:center 42%">
+        <figcaption><b>MotorVille</b>Car condos over the circuit, 1,300-2,500 sq ft</figcaption></figure>
+      <figure><img src="../img/their_deck.jpg" alt="LIMC's own render of the trackside dining deck" loading="lazy" style="object-position:center 30%">
+        <figcaption><b>Hospitality</b>Blacklands Chophouse and Vic's Bourbon Bar</figcaption></figure>
+      <figure><img src="../img/their_shops.jpg" alt="LIMC's own render of the Longhorn pro shop" loading="lazy">
+        <figcaption><b>The Paddock Shops</b>Retail built around car culture</figcaption></figure>
+    </div>
+
+    <div class="close">
+      <div>
+        <h2 style="font-size:clamp(1.4rem,3vw,1.9rem)">Back the build, or just be in the room.</h2>
+        <p>The Bull Pen is free to join. Investor presentations are limited to accredited
+          investors under Rule 501 of Regulation D; returns are not guaranteed and
+          investing involves substantial risk.</p>
+      </div>
+      <div class="act">
+        <a class="btn solid" href="https://longhornmsc.com/thebullpen/">Become a member</a>
+        <a class="plain" href="tel:+19727745898">Investor relations: 972.774.5898</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="wrap">
+      <div class="foot">
+        <div>
+          <b>Longhorn International Motorsports</b>
+          <span>Dallas, Texas</span>
+          <a href="tel:+19727745898">+1 972.774.5898</a>
+          <a href="mailto:info@longhornmsc.com">info@longhornmsc.com</a>
+        </div>
+        <div>
+          <b>This concept</b>
+          <a href="../apex/">The Apex version</a>
+          <a href="../racemode/">Race Mode version</a>
+          <a href="https://longhornmsc.com/">Current official site</a>
+        </div>
+      </div>
+      <p class="legal">A scroll-film website concept prepared by <a href="https://station.solutions/">Station</a>
+        for Longhorn International Motorsports review. Not the official LIMC website. The flight is a
+        concept film of the development as envisioned, generated by Station; campus imagery mixes LIMC's
+        own renders with Station concept renders. Facts and specifications are drawn from longhornmsc.com.
+        &copy; 2026 Longhorn International Motorsports Corporation.</p>
+    </div>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var REDUCED = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var FRAME_COUNT = 0;            // set at build time
+  var PAD = 4;                    // f_0001.jpg
+  var FDIR = 'frames/';
+
+  var canvas = document.getElementById('film'), ctx = canvas.getContext('2d');
+  var grainC = document.getElementById('grain'), gctx = grainC.getContext('2d');
+  var loader = document.getElementById('loader'), lfill = document.getElementById('lfill');
+  var chrome = document.getElementById('chrome');
+  var secLabel = document.getElementById('secLabel'), secFill = document.getElementById('secFill');
+  var vignette = document.getElementById('vignette'), fadeout = document.getElementById('fadeout');
+  var cue = document.getElementById('cue');
+  var filmScroll = document.getElementById('filmScroll');
+
+  var SECTORS = [
+    [0.00,'S1 · THE DIVE'], [0.20,'S2 · THE APPROACH'], [0.40,'S3 · ON THE DECK'],
+    [0.60,'S4 · IGNITION'], [0.80,'S5 · THE STAND']];
+
+  var DPR = Math.min(1.5, window.devicePixelRatio || 1);
+  function size(){
+    canvas.width = innerWidth * DPR; canvas.height = innerHeight * DPR;
+    canvas.style.width = innerWidth+'px'; canvas.style.height = innerHeight+'px';
+    grainC.width = 220; grainC.height = 140;
+    makeGrain();
+  }
+  var grainT = 0;
+  function makeGrain(){
+    var d = gctx.createImageData(220,140);
+    for (var i=0;i<d.data.length;i+=4){ var v = 120+Math.random()*60|0;
+      d.data[i]=v; d.data[i+1]=v; d.data[i+2]=v; d.data[i+3]=26; }
+    gctx.putImageData(d,0,0);
+  }
+
+  // frame store
+  var images = new Array(1024), loaded = 0, firstShown = false;
+  var bitmaps = new Map(), decoding = new Set();
+  var B_AHEAD = 18, B_KEEP = 28, bmpCenter = -999;
+  var displayed = -1, currentFrame = 0, targetFrame = 0;
+
+  function pad(n){ n=''+(n+1); while(n.length<PAD) n='0'+n; return n; }
+  function ensureBitmaps(center){
+    if (Math.abs(center - bmpCenter) < 3 && bitmaps.size) return;
+    bmpCenter = center;
+    var lo = Math.max(0, center-B_AHEAD), hi = Math.min(FRAME_COUNT-1, center+B_AHEAD);
+    for (var i=lo;i<=hi;i++){
+      (function(i){
+        if (bitmaps.has(i) || decoding.has(i) || !images[i]) return;
+        decoding.add(i);
+        createImageBitmap(images[i]).then(function(b){
+          decoding.delete(i);
+          if (Math.abs(i - bmpCenter) > B_KEEP){ b.close(); return; }
+          bitmaps.set(i, b);
+          if (i === displayed) drawFrame(i, true);
+        }).catch(function(){ decoding.delete(i); });
+      })(i);
+    }
+    bitmaps.forEach(function(b,k){
+      if (k < center-B_KEEP || k > center+B_KEEP){ b.close(); bitmaps.delete(k); }
+    });
+  }
+  function nearestFrame(idx){
+    if (images[idx]) return idx;
+    for (var d=1; d<FRAME_COUNT; d++){
+      if (images[idx-d]) return idx-d;
+      if (images[idx+d]) return idx+d;
+    }
+    return -1;
+  }
+  function drawFrame(idx, force){
+    var use = nearestFrame(idx); if (use<0) return;
+    if (use === displayed && !force) return;
+    displayed = use;
+    var src = bitmaps.get(use) || images[use];
+    var iw = src.width, ih = src.height, cw = canvas.width, ch = canvas.height;
+    var s = Math.max(cw/iw, ch/ih), w = iw*s, h = ih*s;
+    ctx.drawImage(src, (cw-w)/2, (ch-h)/2, w, h);
+  }
+
+  // loader pump
+  var CONC = 10, next = 0, PRIORITY = 26;
+  function pump(){
+    while (decodingCount() < CONC && next < FRAME_COUNT){
+      (function(i){
+        var im = new Image();
+        im.onload = function(){ inflight--; images[i]=im; loaded++;
+          if (i===0 && !firstShown){ firstShown=true; drawFrame(0,true); }
+          lfill.style.width = Math.round(100*Math.min(1,loaded/Math.min(FRAME_COUNT,PRIORITY)))+'%';
+          if (loaded >= Math.min(FRAME_COUNT, PRIORITY)) reveal();
+          if (loaded === FRAME_COUNT) allLoaded = true;
+          pump(); };
+        im.onerror = function(){ inflight--; pump(); };
+        im.src = FDIR + 'f_' + pad(i) + '.jpg';
+        inflight++;
+      })(next++);
+    }
+  }
+  var inflight = 0, allLoaded = false;
+  function decodingCount(){ return inflight; }
+
+  var revealed = false;
+  function reveal(){
+    if (revealed) return; revealed = true;
+    ensureBitmaps(0);
+    loader.classList.add('gone');
+    setTimeout(function(){ loader.remove(); finishBoot(); }, 650);
+  }
+
+  // beats
+  var beats = Array.prototype.slice.call(document.querySelectorAll('.beat')).map(function(el){
+    return { el: el, i: +el.dataset.in, pk: +el.dataset.peak, o: +el.dataset.out };
+  });
+  function beatAlpha(b, p){
+    if (p < b.i || p > b.o) return 0;
+    if (p < b.pk) return (p - b.i) / Math.max(1e-4, b.pk - b.i);
+    if (b.o > 1.5) return 1;
+    return 1 - (p - b.pk) / Math.max(1e-4, b.o - b.pk);
+  }
+
+  // adaptive header sampling
+  var lum = document.createElement('canvas'); lum.width=16; lum.height=4;
+  var lctx = lum.getContext('2d', {willReadFrequently:true});
+  var lastSample = 0;
+  function sampleHeader(t){
+    if (t - lastSample < 180 || displayed < 0) return; lastSample = t;
+    try{
+      lctx.drawImage(canvas, 0, 0, canvas.width, canvas.height*0.12, 0, 0, 16, 4);
+      var d = lctx.getImageData(0,0,16,4).data, sum=0;
+      for (var i=0;i<d.length;i+=4) sum += 0.2126*d[i]+0.7152*d[i+1]+0.0722*d[i+2];
+      chrome.classList.toggle('on-light', (sum/(d.length/4)) > 138);
+    }catch(e){}
+  }
+
+  var progress = 0;
+  function computeProgress(){
+    var r = filmScroll.getBoundingClientRect();
+    progress = Math.max(0, Math.min(1, -r.top / (r.height - innerHeight)));
+  }
+
+  var jankMax = 0, lastT = 0;
+  function tick(t){
+    requestAnimationFrame(tick);
+    if (lastT){ var d = t-lastT; if (d>jankMax) jankMax=d; }
+    lastT = t;
+    computeProgress();
+    targetFrame = progress * (FRAME_COUNT - 1);
+    currentFrame += (targetFrame - currentFrame) * 0.14;
+    if (Math.abs(targetFrame - currentFrame) < 0.4) currentFrame = targetFrame;
+    var idx = Math.round(currentFrame);
+    ensureBitmaps(idx);
+    drawFrame(idx);
+    // beats
+    beats.forEach(function(b){
+      var a = beatAlpha(b, progress);
+      b.el.style.opacity = a.toFixed(3);
+      if (b.el.classList.contains('finale')) b.el.classList.toggle('live', a > .5);
+      b.el.style.transform = a>0 ? 'translateY('+((1-a)*14)+'px)' : '';
+    });
+    // sector readout
+    var si = 0; for (var i=0;i<SECTORS.length;i++) if (progress >= SECTORS[i][0]) si = i;
+    if (secLabel.textContent !== SECTORS[si][1]) secLabel.textContent = SECTORS[si][1];
+    secFill.style.width = Math.round(progress*100)+'%';
+    // handoff + grain + cue
+    var ho = Math.max(0, Math.min(1, (progress - 0.92) / 0.08));
+    fadeout.style.opacity = ho;
+    vignette.style.opacity = 1 - ho;
+    grainC.style.opacity = 0.07 * (1-ho);
+    if (t - grainT > 90){ grainT = t; makeGrain(); }
+    cue.style.opacity = progress < 0.02 ? 0.8 : Math.max(0, 0.8 - progress*16);
+    sampleHeader(t);
+  }
+
+  // dev contract
+  var JUMP = new URLSearchParams(location.search).get('jump');
+  if (JUMP !== null) history.scrollRestoration = 'manual';
+  function finishBoot(){
+    if (JUMP !== null){
+      scrollTo(0, +JUMP || 0);
+      computeProgress();
+      currentFrame = targetFrame = progress * (FRAME_COUNT - 1);
+      ensureBitmaps(Math.round(currentFrame));
+      drawFrame(Math.round(currentFrame), true);
+    }
+    window.__ready = true;
+  }
+  setInterval(function(){ window.__jankMax = jankMax; jankMax = 0; }, 2000);
+
+  if (REDUCED){
+    // static: first frame only, no scrub, content immediately
+    size();
+    var im = new Image();
+    im.onload = function(){ images[0]=im; FRAME_COUNT=1; drawFrame(0,true);
+      loader.classList.add('gone'); setTimeout(function(){ loader.remove(); }, 400);
+      window.__ready = true; };
+    im.src = FDIR + 'f_' + pad(0) + '.jpg';
+    window.addEventListener('resize', function(){ size(); drawFrame(0,true); });
+    return;
+  }
+
+  // boot
+  fetch(FDIR + 'manifest.json').then(function(r){ return r.json(); }).then(function(m){
+    FRAME_COUNT = m.count;
+    size(); pump(); requestAnimationFrame(tick);
+  }).catch(function(){
+    document.querySelector('#loader small').textContent = 'FILM UNAVAILABLE';
+  });
+  window.addEventListener('resize', function(){ size(); drawFrame(displayed,true); });
+})();
+</script>
+</body>
+</html>

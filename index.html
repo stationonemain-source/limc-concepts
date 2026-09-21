@@ -27,7 +27,7 @@ header{padding:34px 0 0}
 main{flex:1;display:flex;align-items:center;padding:48px 0}
 h1{margin:0 0 10px;font:800 clamp(1.9rem,5vw,3rem)/1.05 var(--fd);letter-spacing:-.02em;text-transform:uppercase}
 .sub{margin:0 0 36px;color:var(--muted);max-width:60ch}
-.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
 .card{display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;
   background:var(--panel);text-decoration:none;transition:transform .25s cubic-bezier(.2,.7,.3,1),border-color .25s}
 .card:hover{transform:translateY(-4px);border-color:#4A4A55}
@@ -37,7 +37,7 @@ h1{margin:0 0 10px;font:800 clamp(1.9rem,5vw,3rem)/1.05 var(--fd);letter-spacing
 .card p{margin:8px 0 0;color:var(--muted);font-size:14.5px;font-weight:500}
 .card span{display:inline-block;margin-top:14px;font:700 12.5px/1 var(--fd);letter-spacing:.08em;
   text-transform:uppercase;color:var(--accent)}
-@media(max-width:760px){.cards{grid-template-columns:1fr}}
+@media(max-width:980px){.cards{grid-template-columns:1fr}}
 footer{padding:26px 0 34px;font:500 12.5px/1.7 var(--fd);color:#807D78}
 footer a{color:var(--muted);text-decoration:none;display:inline-block;padding:10px 0}
 </style>
@@ -50,10 +50,19 @@ footer a{color:var(--muted);text-decoration:none;display:inline-block;padding:10
   </div>
 </div></header>
 <main><div class="wrap">
-  <h1>Two concepts. One campus.</h1>
+  <h1>Three concepts. One campus.</h1>
   <p class="sub">Website directions prepared for Longhorn International Motorsports.
-    Same facts, two temperatures. Both are built mobile-first and open in this tab.</p>
+    Same facts, three temperatures. Both are built mobile-first and open in this tab.</p>
   <div class="cards">
+    <a class="card" href="film/">
+      <img src="img/night_straight.jpg" alt="Down the floodlit main straight at night" style="object-position:center 70%">
+      <div class="in">
+        <b>The Flying Lap</b>
+        <p>The film is the site: one continuous dive from the Texas sky onto the
+          circuit, dusk into night, scrubbed by your scroll.</p>
+        <span>View concept</span>
+      </div>
+    </a>
     <a class="card" href="apex/">
       <img src="img/apex_hero.jpg" alt="Aerial concept rendering of the LIMC campus at dusk">
       <div class="in">
