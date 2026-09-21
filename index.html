@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LIMC Concepts</title>
+<meta name="description" content="Two website concepts for Longhorn International Motorsports, prepared by Station.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0C0C0E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="img/limc-logo.png">
+<style>
+:root{--bg:#0C0C0E;--panel:#141419;--line:#26262D;--ink:#F2F0EC;--muted:#A9A6A0;--accent:#E23A1E;
+  --fd:'Archivo','Segoe UI',system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 16px/1.6 var(--fd);
+  min-height:100svh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+a{color:var(--ink)}
+.wrap{width:100%;max-width:1080px;margin:0 auto;padding:0 20px}
+header{padding:34px 0 0}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:44px;height:44px}
+.brand b{font:700 14px/1.25 var(--fd);letter-spacing:.12em}
+.brand small{display:block;font:600 10px/1.3 var(--fd);letter-spacing:.22em;color:var(--muted)}
+main{flex:1;display:flex;align-items:center;padding:48px 0}
+h1{margin:0 0 10px;font:800 clamp(1.9rem,5vw,3rem)/1.05 var(--fd);letter-spacing:-.02em;text-transform:uppercase}
+.sub{margin:0 0 36px;color:var(--muted);max-width:60ch}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{display:block;border:1px solid var(--line);border-radius:10px;overflow:hidden;
+  background:var(--panel);text-decoration:none;transition:transform .25s cubic-bezier(.2,.7,.3,1),border-color .25s}
+.card:hover{transform:translateY(-4px);border-color:#4A4A55}
+.card img{width:100%;height:auto;aspect-ratio:16/8;object-fit:cover;display:block}
+.card .in{padding:18px 20px 22px}
+.card b{font:800 19px/1.2 var(--fd);letter-spacing:-.01em}
+.card p{margin:8px 0 0;color:var(--muted);font-size:14.5px;font-weight:500}
+.card span{display:inline-block;margin-top:14px;font:700 12.5px/1 var(--fd);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--accent)}
+@media(max-width:760px){.cards{grid-template-columns:1fr}}
+footer{padding:26px 0 34px;font:500 12.5px/1.7 var(--fd);color:#807D78}
+footer a{color:var(--muted);text-decoration:none;display:inline-block;padding:10px 0}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="brand">
+    <img src="img/limc-logo.png" alt="">
+    <span><b>LONGHORN</b><small>INTERNATIONAL MOTORSPORTS</small></span>
+  </div>
+</div></header>
+<main><div class="wrap">
+  <h1>Two concepts. One campus.</h1>
+  <p class="sub">Website directions prepared for Longhorn International Motorsports.
+    Same facts, two temperatures. Both are built mobile-first and open in this tab.</p>
+  <div class="cards">
+    <a class="card" href="apex/">
+      <img src="img/apex_hero.jpg" alt="Aerial concept rendering of the LIMC campus at dusk">
+      <div class="in">
+        <b>The Apex</b>
+        <p>Investor-grade and quiet. The campus at golden hour, the five tracks as a
+          paddock-club selector, and the business case laid out plainly.</p>
+        <span>View concept</span>
+      </div>
+    </a>
+    <a class="card" href="racemode/">
+      <img src="img/night_straight.jpg" alt="Concept photo down a floodlit main straight at night">
+      <div class="in">
+        <b>Race Mode</b>
+        <p>Night race energy. A game-style track select with LIMC's own difficulty
+          ratings, a campus grid, and the Texas Speed franchise up front.</p>
+        <span>View concept</span>
+      </div>
+    </a>
+  </div>
+</div></main>
+<footer><div class="wrap">
+  Prepared by <a href="https://station.solutions/">Station</a> for LIMC review.
+  Not the official website; campus imagery is concept rendering.
+</div></footer>
+</body>
+</html>
